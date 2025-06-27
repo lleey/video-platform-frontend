@@ -55,7 +55,13 @@ def video_detail(video_id):
         
         video_data = video_response.json()
         
-        # 获取评论，确保即使出错也返回空列表
+        # 确保sources是列表且不为空
+        sources = video_data.get('sources', [])
+        if not sources:
+            flash("视频源不可用", "warning")
+            return redirect(url_for('home'))
+        
+        # 获取评论
         try:
             comments_response = requests.get(f"{API_BASE_URL}/videos/{video_id}/comments")
             comments = comments_response.json() if comments_response.status_code == 200 else []
@@ -64,8 +70,8 @@ def video_detail(video_id):
         
         return render_template('video_detail.html', 
                              video=video_data['video'], 
-                             sources=video_data['sources'],
-                             comments=comments or [])  # 确保comments不会是None
+                             sources=sources,
+                             comments=comments or [])
     except requests.exceptions.RequestException as e:
         flash("获取视频信息失败", "danger")
         return redirect(url_for('home'))
@@ -150,16 +156,16 @@ def upload_video():
 
 @app.route('/comment/<int:video_id>', methods=['POST'])
 def add_comment(video_id):
-    """添加评论"""
+    """添加评论或弹幕"""
     if 'token' not in session:
         flash("请先登录", "warning")
         return redirect(url_for('login'))
     
     content = request.form.get('content')
-    timeline = request.form.get('timeline', 0)
+    timeline = request.form.get('timeline', type=int)
     
     if not content:
-        flash("评论内容不能为空", "danger")
+        flash("内容不能为空", "danger")
         return redirect(url_for('video_detail', video_id=video_id))
     
     try:
@@ -167,10 +173,11 @@ def add_comment(video_id):
             "Authorization": f"Bearer {session['token']}",
             "Content-Type": "application/json"
         }
-        data = {
-            "content": content,
-            "timeline": timeline
-        }
+        
+        # 构建请求体
+        data = {"content": content}
+        if timeline is not None and timeline >= 0:
+            data["timeline"] = timeline
         
         response = requests.post(
             f"{API_BASE_URL}/videos/{video_id}/comments",
@@ -179,11 +186,12 @@ def add_comment(video_id):
         )
         
         if response.status_code == 201:
-            flash("评论发表成功", "success")
+            flash("发表成功", "success")
         else:
-            flash("评论发表失败", "danger")
-    except requests.exceptions.RequestException:
-        flash("网络错误，请稍后再试", "danger")
+            error_msg = response.json().get('message', '发表失败')
+            flash(error_msg, "danger")
+    except requests.exceptions.RequestException as e:
+        flash(f"网络错误: {str(e)}", "danger")
     
     return redirect(url_for('video_detail', video_id=video_id))
 

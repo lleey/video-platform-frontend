@@ -72,6 +72,94 @@
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
+/* ==================== 弹幕相关样式 ==================== */
+.bullet-chat-box {
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #dee2e6 #f8f9fa;
+}
+
+.bullet-chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.bullet-chat-box::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+.bullet-chat-box::-webkit-scrollbar-thumb {
+    background-color: #dee2e6;
+    border-radius: 6px;
+}
+
+.bullet-comment-item {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    border-left: 3px solid #0dcaf0;
+    transition: all 0.2s ease;
+}
+
+.bullet-comment-item:hover {
+    background-color: #e9ecef;
+}
+
+.bullet-time-badge {
+    padding: 0.25rem 0.5rem;
+    background-color: #0dcaf0;
+    color: white;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.bullet-content {
+    padding-left: 0.5rem;
+    border-left: 2px solid #dee2e6;
+    margin-left: 0.5rem;
+}
+
+/* ==================== 评论相关样式 ==================== */
+.comment-box {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.comment-item {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.comment-item:hover {
+    background-color: #e9ecef;
+}
+
+/* ==================== 弹幕显示样式 ==================== */
+.video-bullet {
+    position: absolute;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    font-size: 16px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 100;
+    animation: bullet-move linear;
+    animation-fill-mode: forwards;
+}
+
+@keyframes bullet-move {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
 /* ==================== 响应式调整 ==================== */
 @media (max-width: 768px) {
     .video-container {

@@ -13,9 +13,9 @@
         </p>
         
         <div class="mb-4">
-            <div class="video-container" 
-                 data-bullet-chats="{{ comments|selectattr('timeline')|list|tojson|safe }}">
-                <video id="my-video-{{ video.id }}" class="video-js vjs-big-play-centered" controls preload="auto" width="640" height="360">
+            <!-- 视频播放器容器 -->
+            <div class="video-container">
+                <video id="my-video-{{ video.id }}" class="video-js vjs-big-play-centered" controls preload="auto">
                     {% for source in sources %}
                     <source src="{{ source.url }}" type="application/x-mpegURL" label="{{ source.quality }}">
                     {% endfor %}
@@ -36,51 +36,88 @@
             <p class="mt-3">{{ video.description|default('暂无描述', true) }}</p>
         </div>
 
+        <!-- 弹幕列表 -->
         <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">弹幕列表 ({{ comments|selectattr('timeline')|list|length }})</h5>
+            </div>
+            <div class="card-body bullet-chat-box">
+                {% set bullet_chats = comments|selectattr('timeline')|list %}
+                {% if bullet_chats %}
+                    {% for comment in bullet_chats|sort(attribute='timeline') %}
+                    <div class="bullet-comment-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="bullet-time-badge">{{ comment.timeline }}秒</span>
+                            <small class="text-muted">{{ comment.created_at[:16] }}</small>
+                        </div>
+                        <div class="bullet-content mt-1">
+                            {{ comment.content }}
+                            <small class="text-muted ms-2">- {{ comment.user.nickname }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-muted text-center py-2">暂无弹幕</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 普通评论列表 -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">评论列表 ({{ comments|rejectattr('timeline')|list|length }})</h5>
+            </div>
+            <div class="card-body comment-box">
+                {% set normal_comments = comments|rejectattr('timeline')|list %}
+                {% if normal_comments %}
+                    {% for comment in normal_comments %}
+                    <div class="comment-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>{{ comment.user.nickname }}</strong>
+                            <small class="text-muted">{{ comment.created_at[:16] }}</small>
+                        </div>
+                        <p class="mb-0 mt-1">{{ comment.content }}</p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-muted text-center py-2">暂无评论</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 发表评论/弹幕表单 -->
+        <div class="card">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">发表评论</h5>
+                <h5 class="mb-0">发表内容</h5>
             </div>
             <div class="card-body">
                 {% if 'token' in session %}
                 <form method="POST" action="{{ url_for('add_comment', video_id=video.id) }}" class="comment-form">
                     <div class="mb-3">
-                        <textarea class="form-control" name="content" rows="3" placeholder="写下你的评论..." required></textarea>
+                        <textarea class="form-control" name="content" rows="3" placeholder="输入评论或弹幕内容..." required></textarea>
                     </div>
-                    <div class="mb-3">
-                        <label for="timeline" class="form-label">时间点(秒):</label>
-                        <input type="number" class="form-control" name="timeline" min="0" max="{{ video.duration }}" value="0">
-                        <small class="text-muted">填写时间点可创建弹幕评论</small>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">弹幕时间点</span>
+                                <input type="number" class="form-control" name="timeline" 
+                                       min="0" max="{{ video.duration }}" 
+                                       placeholder="留空则为普通评论">
+                                <span class="input-group-text">秒</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary w-100">
+                                发表
+                            </button>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">提交评论</button>
+                    <small class="text-muted">填写时间点将作为弹幕显示在视频对应位置</small>
                 </form>
                 {% else %}
                 <div class="alert alert-info">
-                    请<a href="{{ url_for('login') }}">登录</a>后发表评论
+                    请<a href="{{ url_for('login') }}">登录</a>后发表内容
                 </div>
-                {% endif %}
-            </div>
-        </div>
-        
-        <div class="card">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">评论列表</h5>
-            </div>
-            <div class="card-body comment-box">
-                {% if comments %}
-                    {% for comment in comments %}
-                    <div class="mb-3 pb-3 border-bottom {% if comment.timeline %}comment-with-timeline{% endif %}">
-                        <div class="d-flex justify-content-between">
-                            <strong>{{ comment.user.nickname }}</strong>
-                            <small class="text-muted">{{ comment.created_at[:16] }}</small>
-                        </div>
-                        {% if comment.timeline %}
-                        <small class="text-muted">在 {{ comment.timeline }}秒</small>
-                        {% endif %}
-                        <p class="mb-0 mt-1">{{ comment.content }}</p>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="text-muted">暂无评论</div>
                 {% endif %}
             </div>
         </div>
