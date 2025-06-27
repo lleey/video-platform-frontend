@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}上传视频{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">上传视频</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="video_file" class="form-label">选择视频文件</label>
+                        <input class="form-control" type="file" id="video_file" name="video_file" accept="video/*" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">视频标题</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">视频描述</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">开始上传</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

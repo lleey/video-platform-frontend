@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}首页{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">最新视频</h1>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for video in videos %}
+    <div class="col">
+        <div class="card h-100 video-card">
+            <a href="{{ url_for('video_detail', video_id=video.id) }}">
+                <img src="{{ video.cover_url }}" class="card-img-top video-cover" alt="{{ video.title }}">
+            </a>
+            <div class="card-body">
+                <h5 class="card-title">{{ video.title }}</h5>
+                <p class="card-text text-muted">
+                    {{ video.description|default('暂无描述', true) }}
+                </p>
+            </div>
+            <div class="card-footer bg-transparent">
+                <small class="text-muted">
+                    时长: {{ video.duration }}秒 | 
+                    发布于: {{ video.created_at[:10] }}
+                </small>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">暂无视频内容</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
