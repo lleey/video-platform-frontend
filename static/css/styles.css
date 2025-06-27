@@ -31,6 +31,24 @@
     to { transform: rotate(360deg); }
 }
 
+/* ==================== 分页样式 ================== */
+.pagination {
+    margin-top: 2rem;
+}
+
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.page-link {
+    color: #0d6efd;
+}
+
+.page-link:hover {
+    color: #0a58ca;
+}
+
 /* ==================== 视频相关 ==================== */
 .quality-selector {
     max-width: 200px;

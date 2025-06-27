@@ -9,15 +9,39 @@ API_BASE_URL = "http://localhost:8000/api/v1"
 
 @app.route('/')
 def home():
-    """首页 - 显示视频列表"""
+    """首页 - 显示视频列表（带分页）"""
     try:
-        response = requests.get(f"{API_BASE_URL}/videos?limit=10")
-        videos = response.json().get('videos', [])
-        print(dict(session))
-        return render_template('index.html', videos=videos)
+        # 获取分页参数，默认为第1页，每页6条
+        page = request.args.get('page', 1, type=int)
+        per_page = 6
+        offset = (page - 1) * per_page
+        
+        # 调用API获取视频列表
+        response = requests.get(
+            f"{API_BASE_URL}/videos",
+            params={'limit': per_page, 'offset': offset}
+        )
+        
+        if response.status_code != 200:
+            flash("无法获取视频列表，请稍后再试", "danger")
+            return render_template('index.html', videos=[], pagination=None)
+        
+        data = response.json()
+        videos = data.get('videos', [])
+        total_videos = data.get('total', 0)
+        
+        # 计算分页信息
+        pagination = {
+            'page': page,
+            'per_page': per_page,
+            'total': total_videos,
+            'pages': (total_videos + per_page - 1) // per_page
+        }
+        
+        return render_template('index.html', videos=videos, pagination=pagination)
     except requests.exceptions.RequestException as e:
-        flash("无法获取视频列表，请稍后再试", "danger")
-        return render_template('index.html', videos=[])
+        flash("获取视频列表失败，请检查网络连接", "danger")
+        return render_template('index.html', videos=[], pagination=None)
 
 @app.route('/video/<int:video_id>')
 def video_detail(video_id):
